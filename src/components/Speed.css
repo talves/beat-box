@@ -1,0 +1,43 @@
+.speed__container {
+  width: 500px;
+  margin: 30px auto;
+  margin-bottom: 5px;
+  flex: 1;
+}
+
+.speed__label {
+  margin: 15px;
+  flex-wrap: nowrap;
+  width: 180px;
+  font-family: inherit;
+  font-weight: bold;
+}
+
+.speed__slider {
+  width: 200px;
+  height: 20px;
+  background-color: rgb(157, 157, 155);
+  border: 1px solid black;
+  border-radius: 5px;
+}
+
+.speed__slider:focus {
+  outline: none;
+}
+
+
+.speed__slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 25px;
+  height: 60px;
+  background: rgb(45, 46, 45);
+  cursor: pointer;
+}
+
+.speed__slider::-moz-range-thumb {
+  width: 25px;
+  height: 60px;
+  background: rgb(45, 46, 45);
+  cursor: pointer;
+}

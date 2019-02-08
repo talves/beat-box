@@ -1,0 +1,28 @@
+.beat__container {
+  padding: 5px;
+  flex: 1;
+}
+
+.beat__button {
+  cursor: pointer;
+  background-color: grey;
+  color: black;
+  font-weight: bold;
+  font-size: large;
+  width: 140px;
+  height: 50px;
+  border-top: 2px inset rgb(100, 98, 111);
+  border-right: 2px inset rgb(165, 161, 172);
+  border-bottom: 2px inset rgb(165, 161, 172);
+  border-left: 2px inset rgb(100, 98, 111);
+  margin: 5px;
+  border-radius: 5px;
+}
+
+.beat__button:focus {
+  outline: none;
+}
+
+.beat__button--lit {
+  background-color: rgb(188, 247, 255);
+}
