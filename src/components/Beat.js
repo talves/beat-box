@@ -1,71 +1,93 @@
-import React, { useReducer, useEffect } from 'react';
+import React from 'react';
+
+import { useKeypress } from './hooks/useKeypress'
+
 import './Beat.css';
 
 function Beat({ id, undoReset, onScreen, name, sound, loop, bpm, letter, clear }) {
-  const [state, setState] = useReducer(
-    (state, newState) => ({...state, ...newState}),
-    { lightup: false, looping: loop, loopID: null, interval: 60000 / bpm },
-  )
+  const [lightup, setLightup] = React.useState(false)
+  const [looping, setLooping] = React.useState(null)
+  const [loopID, setLoopID] = React.useState(null)
+  const [interval, setLoopInterval] = React.useState(60000 / bpm)
+  const keypressed = useKeypress({up: false, down: false, key: letter})
+
+  const showLog = () => {
+    console.log('-----------------------------------')
+    console.log('state.looping:', looping)
+    console.log('state.loopID:', loopID)
+    console.log('props.loop:', loop)
+    console.log('keypressed', keypressed)
+  }
+
   const lightOn = () => {
-    setState({lightup: true});
+    setLightup(true)
     // onScreen function defined in app.js - changes the parent's 'display' state to the name of the key that was just pressed
     onScreen(name);
   }
   const lightOff = () => {
-    setState({lightup: false});
+    setLightup(false);
   }
-  const playBeat = () => {
-    const audio = new Audio(sound);
-    audio.type = 'audio/wav';
-    // if key is already looping, then pressing again should stop the loop (assigned to the key's loopID state)
-    if (state.looping && state.loopID) {
-      clearInterval(state.loopID)
-      setState({looping: false});
-    }
+  const clearLoop = () => {
+    if (loopID === null) return
+    console.log('Clearing loop')
+    clearInterval(loopID)
+    setLoopID(null);
+  }
+  const startLoop = () => {
+    if (loopID !== null) return
+    console.log('Starting loop')
     // if parent passes loop boolean prop - sound plays on a loop/interval
-    else if (loop) {
-      lightOn();
-      audio.play();
-      setState({looping: true, loopID: setInterval(function(){
+    setLoopID(
+      setInterval(function () {
+        const audio = new Audio(sound)
+        audio.type = 'audio/wav'
         audio.play()
-      }, state.interval)});
-    }
-    else audio.play();
+      }, interval)
+    )
   }
-  const mouseDown = (event) => {
+  function playBeat({ keypressed = false }) {
+    showLog()
+    if (loopID !== null) {
+      // if key is already looping, then pressing again should stop the loop (assigned to the key's loopID state)
+      clearLoop()
+    } else if (!keypressed && looping) {
+      startLoop()
+    }
+    else {
+      console.log('Playing only')
+      const audio = new Audio(sound)
+      audio.type = 'audio/wav'
+      audio.play();
+    }
+  }
+  const onDown = (event) => {
     event.preventDefault()
     lightOn()
-    playBeat()
+    playBeat({ keypressed: (event.key) })
   }
-  const mouseUp = (event) => {
+  const onUp = (event) => {
     event.preventDefault()
-    if (!state.looping) lightOff()
+    if (!loopID) lightOff()
   }
-  const onBeatDown = (e) => {
-    if (e.key === letter.toLowerCase()) mouseDown(e)
-  }
-  useEffect(() => {
-    function keyDown(e) {
-      if (e.key === letter.toLowerCase()) mouseDown(e)
-    }
-    document.addEventListener('keydown', keyDown)
-    return () => document.removeEventListener('keydown', keyDown);
-  }, [])
-  useEffect(() => {
-    function keyUp(e) {
-      if (e.key === letter.toLowerCase()) {
-        mouseUp(e)
-      }
-    }
-    document.addEventListener('keyup', keyUp)
-    return () => document.removeEventListener('keyup', keyUp);
-  }, [])
 
-  useEffect(() => {
-    setState({interval: 60000 / bpm})
+  React.useEffect(() => {
+    if (keypressed.down) {
+      lightOn()
+      if (keypressed.up !== keypressed.down) playBeat({ keypressed: true })
+    }
+    if (keypressed.up && !loopID) lightOff()
+  }, [keypressed.up, keypressed.down])
+
+  React.useEffect(() => {
+    setLooping(loop)
+  }, [loop])
+
+  React.useEffect(() => {
+    setLoopInterval(60000 / bpm)
   }, [bpm])
-  useEffect(() => {
-    clearInterval(state.loopID)
+
+  React.useEffect(() => {
+    clearLoop()
     lightOff()
     undoReset()
   }, [clear])
@@ -73,14 +95,13 @@ function Beat({ id, undoReset, onScreen, name, sound, loop, bpm, letter, clear }
   return (
     <div className='beat__container'>
       <button
-        title={`Interval ${state.interval/1000}`}
-        className={`beat__button${state.lightup ? ' beat__button--lit' : ''}`}
-        onMouseDown={mouseDown}
-        onMouseUp={mouseUp}
-        onKeyPress={onBeatDown}
+        title={`Interval ${interval / 1000}`}
+        className={`beat__button${lightup ? ' beat__button--lit' : ''}`}
+        onMouseDown={onDown}
+        onMouseUp={onUp}
       >{id}</button>
     </div>
-    )
+  )
 }
 
 export default Beat
