@@ -9,7 +9,7 @@ function Beat({ id, undoReset, onScreen, name, sound, loop, bpm, letter, clear }
   const [looping, setLooping] = React.useState(null)
   const [loopID, setLoopID] = React.useState(null)
   const [interval, setLoopInterval] = React.useState(60000 / bpm)
-  const keypressed = useKeypress({up: false, down: false, key: letter})
+  const keypressed = useKeypress({ key: letter})
 
   const showLog = () => {
     console.log('-----------------------------------')
